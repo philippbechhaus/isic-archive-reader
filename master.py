@@ -58,11 +58,11 @@ def urls(limit):
     return new_list
 
 
-####### MULTIPROCESSING #######
+####### GET.DIAGNOSIS | MULTIPROCESSING #######
 def get_content(url):
     return json.load(urlopen(url))
 
-def diagnosis_content(limit):
+def diagnosis(limit):
     a = datetime.datetime.now()
     URLS = urls(limit)
     pool = multiprocessing.Pool(processes=16)
