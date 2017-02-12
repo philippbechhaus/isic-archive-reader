@@ -35,7 +35,7 @@ def_url = 'https://isic-archive.com/api/v1/image'
 ####### GET.ID #######
 def ids(limit):
     idsearch_url = def_url + '?limit=' + str(limit)
-    idsearch_json = urllib2.urlopen(idsearch_url)
+    idsearch_json = urlopen(idsearch_url)
     idsearch_data = json.load(idsearch_json)
     ids = []
     for img in idsearch_data:
@@ -65,7 +65,7 @@ def get_content(url):
 def diagnosis(limit):
     a = datetime.datetime.now()
     URLS = urls(limit)
-    pool = multiprocessing.Pool(processes=16)
+    pool = multiprocessing.Pool(processes=512)
     results = pool.map(get_content, URLS)
     pool.close()  # the process pool no longer accepts new tasks
     pool.join()   # join the processes: this blocks until all URLs are processed
