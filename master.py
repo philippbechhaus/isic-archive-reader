@@ -21,6 +21,7 @@
 
 ####### IMPORT PACKAGES #######
 from urllib2 import urlopen
+from urllib import urlretrieve
 import json
 import progressbar
 import time, sys
@@ -75,3 +76,22 @@ def diagnosis(limit):
     b = datetime.datetime.now()
     print(b-a)
     return result_list
+
+####### GET.DIAGNOSIS | MULTIPROCESSING #######
+rgblist = []
+
+def image_rgb(limit):
+    a = datetime.datetime.now()
+    URLS = urls(limit)
+    i = 0
+    for url in URLS:
+        dwld = urlretrieve(
+            url+'/download',os.path.join("/Users/philipp/Projects/isic-archive-reader/images","img"+str(i)+".jpg"))
+        img = Image.open('images/'+'img'+str(i)+'.jpg')
+        imglist = list(img.getdata())
+        rgblist.append(imglist)
+        i += 1
+        print dwld
+    b = datetime.datetime.now()
+    print(b-a)
+    return
