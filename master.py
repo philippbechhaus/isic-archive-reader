@@ -20,18 +20,19 @@
 
 
 ####### IMPORT PACKAGES #######
-import urllib2
+from urllib2 import urlopen
 import json
 import progressbar
 import time, sys
 import datetime
+import multiprocessing
 
 
 ####### STATIC URL #######
 def_url = 'https://isic-archive.com/api/v1/image'
 
 
-####### IMAGE.ID SEARCH #######
+####### GET.ID #######
 def ids(limit):
     idsearch_url = def_url + '?limit=' + str(limit)
     idsearch_json = urllib2.urlopen(idsearch_url)
@@ -41,6 +42,8 @@ def ids(limit):
         ids.append(img['_id'])
     return ids
 
+
+####### GET.URL #######
 def urls(limit):
     a = datetime.datetime.now()
     temp_list = ids(limit)
@@ -54,15 +57,21 @@ def urls(limit):
     print(b-a)
     return new_list
 
-def diagnosis(limit):
+
+####### MULTIPROCESSING #######
+def get_content(url):
+    return json.load(urlopen(url))
+
+def diagnosis_content(limit):
     a = datetime.datetime.now()
-    diag_list = urls(limit)
+    URLS = urls(limit)
+    pool = multiprocessing.Pool(processes=16)
+    results = pool.map(get_content, URLS)
+    pool.close()  # the process pool no longer accepts new tasks
+    pool.join()   # join the processes: this blocks until all URLs are processed
     result_list = []
-    for temp in diag_list:
-        temp_url = temp
-        diagnosesearch_json = urllib2.urlopen(temp_url)
-        diagnosesearch_data = json.load(diagnosesearch_json)
-        result_list.append(diagnosesearch_data['_id'] + ": " + diagnosesearch_data['meta']['clinical']['benign_malignant'])
+    for result in results:
+        result_list.append(result['_id'] + ": " + result['meta']['clinical']['benign_malignant'])
     b = datetime.datetime.now()
     print(b-a)
     return result_list
