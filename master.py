@@ -27,7 +27,8 @@ import progressbar
 import time, sys
 import datetime
 import multiprocessing
-
+import os
+from PIL import Image
 
 ####### STATIC URL #######
 def_url = 'https://isic-archive.com/api/v1/image'
@@ -86,12 +87,12 @@ def image_rgb(limit):
     i = 0
     for url in URLS:
         dwld = urlretrieve(
-            url+'/download',os.path.join("/Users/philipp/Projects/isic-archive-reader/images","img"+str(i)+".jpg"))
-        img = Image.open('images/'+'img'+str(i)+'.jpg')
+            url+'/download','img'+str(i)+'.jpg')
+        img = Image.open('img'+str(i)+'.jpg')
         imglist = list(img.getdata())
         rgblist.append(imglist)
+        os.remove('img'+str(i)+'.jpg')
         i += 1
-        print dwld
     b = datetime.datetime.now()
     print(b-a)
     return
