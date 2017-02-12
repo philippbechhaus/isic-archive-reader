@@ -29,6 +29,8 @@ import datetime
 import multiprocessing
 import os
 from PIL import Image
+import uuid
+import shutil
 
 ####### STATIC URL #######
 def_url = 'https://isic-archive.com/api/v1/image'
@@ -45,7 +47,7 @@ def ids(limit):
     return ids
 
 
-####### GET.URL #######
+####### GET.URLs #######
 def urls(limit):
     a = datetime.datetime.now()
     temp_list = ids(limit)
@@ -53,6 +55,19 @@ def urls(limit):
     nr = 0
     for i in temp_list:
         temp = def_url + '/' + temp_list[nr]
+        new_list.append(temp)
+        nr += 1
+    b = datetime.datetime.now()
+    print(b-a)
+    return new_list
+
+def d_urls(limit):
+    a = datetime.datetime.now()
+    temp_list = ids(limit)
+    new_list = []
+    nr = 0
+    for i in temp_list:
+        temp = def_url + '/' + temp_list[nr] + '/download'
         new_list.append(temp)
         nr += 1
     b = datetime.datetime.now()
@@ -78,21 +93,29 @@ def diagnosis(limit):
     print(b-a)
     return result_list
 
-####### GET.DIAGNOSIS | MULTIPROCESSING #######
+####### GET.RGBs | MULTIPROCESSING #######
 rgblist = []
+
+def get_image(url):
+    return urlretrieve(url,os.path.join(
+    "/Users/philipp/Projects/isic-archive-reader/images",str(
+    uuid.uuid4())+'static.jpg'))
 
 def image_rgb(limit):
     a = datetime.datetime.now()
-    URLS = urls(limit)
-    i = 0
-    for url in URLS:
-        dwld = urlretrieve(
-            url+'/download','img'+str(i)+'.jpg')
-        img = Image.open('img'+str(i)+'.jpg')
+    newpath = 'images'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    URLS = d_urls(limit)
+    pool = multiprocessing.Pool(processes=32)
+    results = pool.map(get_image, URLS)
+    pool.close()  # the process pool no longer accepts new tasks
+    pool.join()   # join the processes: this blocks until all URLs are processed
+    for result in results:
+        img = Image.open(result[0])
         imglist = list(img.getdata())
         rgblist.append(imglist)
-        os.remove('img'+str(i)+'.jpg')
-        i += 1
+    shutil.rmtree('images')
     b = datetime.datetime.now()
     print(b-a)
     return
