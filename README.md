@@ -1,5 +1,5 @@
 # ISIC Archive Reader
-_methods to crawl pictures and get corresponding annotations about skin moles_
+_methods to crawl images and get corresponding annotations about skin moles_
 
 # Usage
 Use the _master.py_ file to execute the preferred methods. Those are:
