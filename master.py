@@ -112,15 +112,20 @@ def diagnosis(limit):
 # Creates temp folder to store downloaded images
 # After conversion, deletes folder
 # Run with multiple processes
+
+# Helper functions
 rgblist = []
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
-# Helper to create unique image on OS
-def get_image(url):
-    return urlretrieve(url,os.path.join(
-    "/Users/philipp/Projects/isic-archive-reader/images",str(
-    uuid.uuid4())+'static.jpg'))
+def get_id(url):
+    temp = url.split('/')
+    return temp[6]
 
-def convert_to_rgb(limit):
+def get_image_help(url):
+    return urlretrieve(url,os.path.join(dir_path+"/images",str(
+    get_id(url))+'.jpg'))
+
+def get_image(limit):
     # Set process limit:
     process_limit = 32
     # Method start:
@@ -128,18 +133,27 @@ def convert_to_rgb(limit):
     newpath = 'images'
     if not os.path.exists(newpath):
         os.makedirs(newpath)
+    else:
+        shutil.rmtree('images')
+        os.makedirs(newpath)
     URLS = d_urls(limit)
     pool = multiprocessing.Pool(processes=process_limit)
-    results = pool.map(get_image, URLS)
+    results = pool.map(get_image_help, URLS)
     pool.close()  # the process pool no longer accepts new tasks
     pool.join()   # join the processes: this blocks until all URLs are processed
-    for result in results:
-        img = Image.open(result[0])
-        imglist = img.getdata()
-        rgblist.append(imglist)
-    shutil.rmtree('images')
     b = datetime.datetime.now()
-    print(b-a)
+    print (b-a)
+    return results
+
+def convert_to_rgb(limit):
+    a = datetime.datetime.now()
+    images = get_image(limit)
+    for image in images:
+        img = Image.open(image[0])
+        imglist = list(img.getdata())
+        rgblist.append(imglist)
+    b = datetime.datetime.now()
+    print (b-a)
     return
 # <--- method end --->
 
@@ -181,5 +195,6 @@ if __name__ == '__main__':
         for te in temp:
             print te
     elif selection == 3:
-        temp = convert_to_rgb(limit)
-        print temp
+        convert_to_rgb(limit)
+        for te in rgblist:
+            print te
