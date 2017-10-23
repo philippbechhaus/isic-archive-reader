@@ -24,6 +24,6 @@ Use methods within the _dnn_utils.py_ and _prep_utils.py_ (has main method) file
 > * Show mislabeled method
 
 
-For quick API/images access, run prep_utils.py_ from your Terminal of choice. The brief wizard will walk you through then.
+For quick API/images access, run _prep_utils.py_ from your Terminal of choice. The brief wizard will walk you through then.
 
 Questions to _philippbechhaus@gmail.com_
