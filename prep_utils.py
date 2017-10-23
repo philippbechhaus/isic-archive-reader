@@ -92,7 +92,7 @@ def get_content(url):
 
 def diagnosis(limit):
     # Set process limit:
-    process_limit = 16
+    process_limit = 20
     # Method start:
     a = datetime.datetime.now()
     URLS = urls(limit)
@@ -107,31 +107,37 @@ def diagnosis(limit):
     print(b-a)
     return result_list
 
-# Creates list with RGB code of each images
+
 # Creates temp folder to store downloaded images
-# After conversion, deletes folder
 # Run with multiple processes
-rgblist = []
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def get_id(url):
     temp = url.split('/')
     return temp[6]
 
-def get_image_help(url):
-    return urlretrieve(url,os.path.join(dir_path+"/images",str(
-    get_id(url))+'.jpg'))
+def d_image_help(url):
+    return urlretrieve(url,os.path.join(dir_path+"/images",str(get_id(url))+'.jpg'))
 
-def convert_to_rgb(limit):
+def d_images(limit):
+    # Set process limit:
+    process_limit = 10
+    # Method start:
     a = datetime.datetime.now()
-    images = get_image(limit)
-    for image in images:
-        img = Image.open(image[0])
-        imglist = list(img.getdata())
-        rgblist.append(imglist)
+    newpath = 'images'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    else:
+        shutil.rmtree('images')
+        os.makedirs(newpath)
+    URLS = d_urls(limit)
+    pool = multiprocessing.Pool(processes=process_limit)
+    results = pool.map(d_image_help, URLS)
+    pool.close()  # the process pool no longer accepts new tasks
+    pool.join()   # join the processes: this blocks until all URLs are processed
     b = datetime.datetime.now()
     print (b-a)
-    return
+    return results
 
 # Main
 if __name__ == '__main__':
@@ -152,7 +158,7 @@ if __name__ == '__main__':
     while True:
         try:
             selection = int(input("Which method would you like to run? " "\n" "\n" "Select" "\n" "1 for a list of download URLs"
-                           "\n" "2 for a list of diagnoses with corresponding Image UUID" "\n" "3 for a list of RGB converted images with corresponding UUID" "\n" "\n"))
+                           "\n" "2 for a list of diagnoses with corresponding Image UUID" "\n" "3 for storing images locally" "\n" "\n"))
         except NameError:
             print("That's not a number!")
         except SyntaxError:
@@ -172,6 +178,6 @@ if __name__ == '__main__':
         for te in temp:
             print(te)
     elif selection == 3:
-        convert_to_rgb(limit)
-        for te in rgblist:
+        temp = d_images(limit)
+        for te in temp:
             print(te)
