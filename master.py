@@ -29,8 +29,8 @@
 '''
 
 # Import packages
-from urllib2 import urlopen
-from urllib import urlretrieve
+from urllib.request import urlopen
+from urllib.request import urlretrieve
 import json
 import time, sys
 import datetime
@@ -92,7 +92,7 @@ def get_content(url):
 
 def diagnosis(limit):
     # Set process limit:
-    process_limit = 32
+    process_limit = 16
     # Method start:
     a = datetime.datetime.now()
     URLS = urls(limit)
@@ -102,18 +102,15 @@ def diagnosis(limit):
     pool.join()   # join the processes: this blocks until all URLs are processed
     result_list = []
     for result in results:
-        result_list.append(result['_id'] + ": " + result['meta']['clinical']['benign_malignant'])
+        result_list.append(result['_id'] + "." + result['meta']['clinical']['benign_malignant'])
     b = datetime.datetime.now()
     print(b-a)
     return result_list
 
-# <--- method start --->
 # Creates list with RGB code of each images
 # Creates temp folder to store downloaded images
 # After conversion, deletes folder
 # Run with multiple processes
-
-# Helper functions
 rgblist = []
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -125,26 +122,6 @@ def get_image_help(url):
     return urlretrieve(url,os.path.join(dir_path+"/images",str(
     get_id(url))+'.jpg'))
 
-def get_image(limit):
-    # Set process limit:
-    process_limit = 32
-    # Method start:
-    a = datetime.datetime.now()
-    newpath = 'images'
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-    else:
-        shutil.rmtree('images')
-        os.makedirs(newpath)
-    URLS = d_urls(limit)
-    pool = multiprocessing.Pool(processes=process_limit)
-    results = pool.map(get_image_help, URLS)
-    pool.close()  # the process pool no longer accepts new tasks
-    pool.join()   # join the processes: this blocks until all URLs are processed
-    b = datetime.datetime.now()
-    print (b-a)
-    return results
-
 def convert_to_rgb(limit):
     a = datetime.datetime.now()
     images = get_image(limit)
@@ -155,8 +132,8 @@ def convert_to_rgb(limit):
     b = datetime.datetime.now()
     print (b-a)
     return
-# <--- method end --->
 
+# Main
 if __name__ == '__main__':
     print("ISIC Archive Reader" "\n" "Code by Philipp Bechhaus" "\n" "\n")
     while True:
@@ -189,12 +166,12 @@ if __name__ == '__main__':
     if selection == 1:
         temp = d_urls(limit)
         for te in temp:
-            print te
+            print(te)
     elif selection == 2:
         temp = diagnosis(limit)
         for te in temp:
-            print te
+            print(te)
     elif selection == 3:
         convert_to_rgb(limit)
         for te in rgblist:
-            print te
+            print(te)
